@@ -303,6 +303,10 @@ def stdin_loop(dev):
 
 
 def main():
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")  # acentos corretos no terminal do Windows
+    except AttributeError:
+        pass
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--port", type=int, default=81)
     ap.add_argument("--host", default="0.0.0.0")
