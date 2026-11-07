@@ -1,0 +1,7 @@
+{
+  "name": "core",
+  "version": "1.0.0",
+  "description": "Lógica pura (sem Arduino) da tomada inteligente: máquina de estados de presença e cálculo de economia.",
+  "frameworks": "*",
+  "platforms": "*"
+}

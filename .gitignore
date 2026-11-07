@@ -1,0 +1,16 @@
+# firmware
+firmware/.pio/
+firmware/include/secrets.h
+firmware/.vscode/
+
+# dashboard
+dashboard/node_modules/
+dashboard/dist/
+dashboard/*.tsbuildinfo
+dashboard/node_modules/.tmp/
+
+# geral
+.DS_Store
+Thumbs.db
+*.log
+__pycache__/

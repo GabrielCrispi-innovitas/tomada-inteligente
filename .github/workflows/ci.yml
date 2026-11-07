@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('firmware/platformio.ini') }}
+      - run: pip install platformio
+      - name: Testes da máquina de estados (PC)
+        run: pio test -e native
+        working-directory: firmware
+      - name: Compilar firmware real
+        run: pio run -e esp32dev
+        working-directory: firmware
+      - name: Compilar firmware com Wi-Fi habilitado
+        run: cp include/secrets.example.h include/secrets.h && pio run -e esp32dev && rm include/secrets.h
+        working-directory: firmware
+      - name: Compilar firmware simulado
+        run: pio run -e esp32dev-sim
+        working-directory: firmware
+
+  dashboard:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: dashboard/dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: [firmware, dashboard]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
